@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Draw a blue rectangle (canvas version)</title>
+    </head>
+    
+    <body onload="main()">
+        <canvas id="example" width="400" height="400">
+            Please use a browser that supports "canvas"
+        </canvas>
+
+        
+        <div>
+            <label for="x">V1: x</label>
+            <input type="number" id="x" />
+            <label for="y">y</label>
+            <input type="number" id="y" />
+        </div>
+
+
+        <div>
+            <label for="x2">V2: x</label>
+            <input type="number" id="x2" />
+            <label for="y2">y</label>
+            <input type="number" id="y2" />
+        </div>
+        <div>
+            <button id="draw">Draw</button>
+        </div>
+
+        <div>
+            <p>Operation: 
+                <select id="operation">
+                    <option value="add">Add</option>
+                    <option value="sub">Subtract</option>
+                    <option value="mul">Multiply</option>
+                    <option value="div">Divide</option>
+                    <option value="angle">Angle Between</option>
+                    <option value="area">Area</option>
+                    <option value="mag">Magnitude</option>
+                    <option value="norm">Normalize</option>
+
+                </select>
+            Scalar: 
+                <input type="number" id="scalar" />
+            </p>
+
+            <button onclick="handleDrawOperationEvent()">Draw</button>
+
+
+        </div>
+
+        <div>
+            <p>Austin Wang</p>
+            <p>aupwang@ucsc.edu</p>
+
+        </div>
+        
+
+        <script src="lib/cuon-matrix-cse160.js"></script>
+        <script src="asg0.js"></script>
+    </body>
+    
+</html> 
