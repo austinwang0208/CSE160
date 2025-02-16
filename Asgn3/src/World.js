@@ -201,6 +201,7 @@ let feetSlideAnimation = false;
 let tailAnimation = false;
 let g_feetAngle = 0;
 let g_tailAngle = 0;
+let g_globalSize = 1;
 
 
 let isDragging = false;
@@ -305,6 +306,7 @@ function updateCameraVectors() {
 }
 
 function getRandomPosition() {
+    console.log(g_map);
     let x = Math.floor(Math.random() * g_map.length);
     let y = Math.floor(Math.random() * g_map[0].length);
 
@@ -346,6 +348,8 @@ function addActionsforHTMLUI(){
 
     document.getElementById('tailOn').onclick = function() { tailAnimation=true };
     document.getElementById('tailOff').onclick = function() { tailAnimation=false };
+    document.getElementById('size').addEventListener('mousemove', function() { g_globalSize = this.value; renderAllShapes(); });
+
     //slider
     // document.getElementById('angleSlide').addEventListener('mouseup', function() { g_globalAngle = this.ariaValueMax; renderAllShapes(); });
     document.getElementById('angleSlide').addEventListener('mousemove', function() { g_globalAngle = this.value; renderAllShapes(); });
@@ -633,17 +637,21 @@ function drawPsyduckFace(matrix) {
     const face = new Sphere();
     face.color = [1.0, 0.85, 0.25, 1.0];
     face.matrix.set(matrix);
+    face.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
     face.matrix.scale(1.5, 1.2, 1.3);
     face.render();
 
     const hair1 = new Cube();
     hair1.color = [0, 0, 0, 1.0]; 
     hair1.matrix.set(matrix);
+    hair1.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
     hair1.matrix.scale(0.05, 0.7, 0.05); 
     hair1.matrix.translate(0, 1.4, -0.5); 
     hair1.render();
 
     const hair2 = new Cube();
+    hair2.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
+
     hair2.color = [0, 0, 0, 1.0];  
     hair2.matrix.set(matrix);
 
@@ -658,6 +666,8 @@ function drawPsyduckFace(matrix) {
     const hair3 = new Cube();
     hair3.color = [0, 0, 0, 1.0];  
     hair3.matrix.set(matrix);
+    hair3.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
+
     hair3.matrix.rotate(-10, 0, 0, 1);
     hair3.matrix.scale(0.05, 0.7, 0.05); 
     hair3.matrix.translate(0, 1.4, -0.5); 
@@ -668,6 +678,7 @@ function drawPsyduckFace(matrix) {
     const beak = new Sphere();
     beak.color = [0.9, 0.9, 0.7, 0.9];
     beak.matrix.set(matrix);
+    beak.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
     beak.matrix.rotate(7, 1, 0, 0);
     beak.matrix.translate(0, -0.5, 1.5); 
     beak.matrix.scale(0.6, 0.3, 1); 
@@ -677,6 +688,7 @@ function drawPsyduckFace(matrix) {
     const beakopen = new Sphere();
     beakopen.color = [0, 0, 0, 1];
     beakopen.matrix.set(matrix);
+    beakopen.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
     beakopen.matrix.rotate(7, 1, 0, 0);
     beakopen.matrix.translate(0, -0.5, 1.5); 
     beakopen.matrix.scale(0.61, 0.1, 1.01); 
@@ -686,6 +698,8 @@ function drawPsyduckFace(matrix) {
     const eye = new Sphere();
     eye.color = [1.0, 1.0, 1.0, 1.0]; 
     eye.matrix.set(matrix);
+    eye.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
+
     eye.matrix.translate(-0.5, 0.3, 1); 
     eye.matrix.scale(0.4, 0.3, 0.4); 
     eye.render();
@@ -693,6 +707,7 @@ function drawPsyduckFace(matrix) {
     const eye2 = new Sphere();
     eye2.color = [1.0, 1.0, 1.0, 1.0];
     eye2.matrix.set(matrix);
+    eye2.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
     eye2.matrix.translate(0.5, 0.3, 1);
     eye2.matrix.scale(0.4, 0.3, 0.4);
     eye2.render();
@@ -700,6 +715,8 @@ function drawPsyduckFace(matrix) {
     const pupil = new Sphere();
     pupil.color = [0.0, 0.0, 0.0, 1.0];
     pupil.matrix.set(matrix);
+    pupil.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
+
     pupil.matrix.translate(-0.6, 0.4, 1.3);
     pupil.matrix.scale(0.1, 0.1, 0.1);
     pupil.render();
@@ -707,6 +724,8 @@ function drawPsyduckFace(matrix) {
     const pupil2 = new Sphere();
     pupil2.color = [0.0, 0.0, 0.0, 1.0];
     pupil2.matrix.set(matrix);
+    pupil2.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
+
     pupil2.matrix.translate(0.6, 0.4, 1.3); 
     pupil2.matrix.scale(0.1, 0.1, 0.1);
     pupil2.render();
@@ -723,6 +742,8 @@ function drawPsyduckBody(matrix) {
     torso.textureNum = 0;
     torso.color = [1.0, 0.8, 0.2, 1.0];
     torso.matrix.set(matrix);
+    torso.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
+
     torso.matrix.translate(0, -1.9, 0); 
     torso.matrix.scale(1.6, 1.8, 1.5); 
     torso.render();
@@ -731,6 +752,8 @@ function drawPsyduckBody(matrix) {
     const leftArm = new Sphere();
     leftArm.color = [1.0, 0.82, 0.25, 1.0];
     leftArm.matrix.set(matrix);
+    leftArm.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
+
     leftArm.matrix.translate(-1.4, -1.5, 0);
     leftArm.matrix.rotate(-g_yellowAngle, 0, 0, 1);
     const leftArmMat = new Matrix4(leftArm.matrix);
@@ -740,6 +763,8 @@ function drawPsyduckBody(matrix) {
     const leftArm2 = new Sphere();
     leftArm2.color = [1.0, 0.82, 0.25, 1.0];
     leftArm2.matrix = new Matrix4(leftArmMat); 
+    leftArm2.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
+
 
     leftArm2.matrix.translate(-0.6, 0, 0);
     leftArm2.matrix.rotate(-g_purpleAngle, 0, 0, 1);
@@ -753,6 +778,8 @@ function drawPsyduckBody(matrix) {
     const rightArm = new Sphere();
     rightArm.color = [1.0, 0.82, 0.25, 1.0];
     rightArm.matrix.set(matrix);
+    rightArm.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
+
     rightArm.matrix.translate(1.4, -1.5, 0);
     rightArm.matrix.rotate(g_yellowAngle, 0, 0, 1);
     const rightArmMatrix = new Matrix4(rightArm.matrix);
@@ -762,6 +789,8 @@ function drawPsyduckBody(matrix) {
     const rightArm2 = new Sphere();
     rightArm2.color = [1.0, 0.82, 0.25, 1.0];
     rightArm2.matrix = new Matrix4(rightArmMatrix);
+    rightArm2.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
+
 
     rightArm2.matrix.translate(0.6, 0, 0);
 
@@ -776,6 +805,8 @@ function drawPsyduckBody(matrix) {
     const feet1 = new Sphere();
     feet1.color = [0.9, 0.9, 0.7, 0.9];
     feet1.matrix.set(matrix);
+    feet1.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
+
     feet1.matrix.translate(0.6, -3.5, 0.5);
 
     const feetjoint = -1;
@@ -793,6 +824,8 @@ function drawPsyduckBody(matrix) {
     const feet2 = new Sphere();
     feet2.color = [0.9, 0.9, 0.7, 0.9];
     feet2.matrix.set(matrix);
+    feet2.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
+
     feet2.matrix.translate(-0.6, -3.5, 0.5);
     feet2.matrix.translate(0, 0, feetjoint);
     feet2.matrix.rotate(-g_feetAngle, 1, 0, 0);           
@@ -806,6 +839,8 @@ function drawPsyduckBody(matrix) {
     const tail = new Sphere();
     tail.color = [1.0, 0.85, 0.25, 1.0];
     tail.matrix.set(matrix);
+    tail.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
+
     tail.matrix.translate(0, -2.7, -1.4);
     const tailMatrix = new Matrix4(tail.matrix);
     tail.matrix.scale(0.5, 0.4, 0.5);
@@ -815,6 +850,7 @@ function drawPsyduckBody(matrix) {
     const tail2 = new Sphere();
     tail2.color = [1.0, 0.85, 0.25, 1.0];
     tail2.matrix = tailMatrix;
+    tail2.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
     tail2.matrix.rotate(g_tailAngle, 0, 1, 0);
 
     tail2.matrix.translate(0, 0, -0.3);
@@ -826,6 +862,8 @@ function drawPsyduckBody(matrix) {
     const tail3 = new Sphere();
     tail3.color = [1.0, 0.85, 0.25, 1.0];
     tail3.matrix = tail2Matrix;
+    tail3.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
+
     tail3.matrix.rotate(g_tailAngle * 3, 0, 1, 0);
     tail3.matrix.translate(0, 0, 1);
     tail3.matrix.rotate(-20, 1, 0, 0);
@@ -1005,8 +1043,8 @@ function renderAllShapes() {
   gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
 
-  const psyduckX = psyduckPosition.x - g_map.length / 2 + 0.5;
-  const psyduckZ = psyduckPosition.y - g_map[0].length / 2 + 0.5;
+  const psyduckX = (psyduckPosition.x - g_map.length / 2 + 0.5) * 20;
+  const psyduckZ = (psyduckPosition.y - g_map[0].length / 2 + 0.5) * 20;
 
   // just enabling didnt work had to add this here chatgpt helped me figure that out
   gl.enable(gl.DEPTH_TEST);
@@ -1018,7 +1056,7 @@ function renderAllShapes() {
   faceMatrix.rotate(rotationZ, 0, 0, -1); // Roll (if needed)
   faceMatrix.rotate(g_feetAngle, 0, 0, 1);
   faceMatrix.scale(0.05, 0.05, 0.05); 
-  faceMatrix.translate(psyduckX, -10, psyduckZ);
+  faceMatrix.translate(psyduckX, -7, psyduckZ);
 
   drawGround();
   drawPsyduckFace(faceMatrix);
