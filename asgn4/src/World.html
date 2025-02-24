@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>BlockyAnimal</title>
+
+  
+  </head>
+
+  <body>
+
+
+    <div id="title">Find Waldo, but find Psyduck</div>
+    <div><p>Austin Wang, aupwang@ucsc.edu</p></div>
+    <canvas id="webgl" width="400" height="400">
+      Please use a browser that supports "canvas"
+    </canvas>
+    <!-- <img src="CSE160Dog.png" alt="DogImage" width="400" height="400"> -->
+
+    <p id="numdot">XXX</p>
+
+
+    <div class = "slider-container">
+      <label for="lightSlideX">Light X</label>
+      <input id="lightSlideX" type="range" min="-250" max="250" value="0">
+
+      <label for="lightSlideY">Light Y</label>
+      <input id="lightSlideY" type="range" min="-250" max="250" value="100">
+
+      <label for="lightSlideZ">Light Z</label>
+      <input id="lightSlideZ" type="range" min="-250" max="250" value="-200">
+
+    </div>
+
+    <div class = "slider-container">
+      <label for="size">Psyduck Size</label>
+      <input id="size" type="range" min="1" max="5" value="1">
+      Normal
+      <button type="button" id="normalOn">On</button>
+      <button type="button" id="normalOff">Off</button>
+    </div>
+
+
+    <div class="slider-container">
+      <label for="angleSlide">Camera Angle</label>
+      <input id="angleSlide" type="range" min="0" max="360" value="0">
+    </div>
+
+
+    <div class="slider-container">
+      <label for="yellowSlide">Upper Arm</label>
+      <input id="yellowSlide" type="range" min="-45" max="15" value="15">
+      Animation
+      <button type="button" id="animationYellowOnButton">On</button>
+      <button type="button" id="animationYellowOffButton">Off</button>
+    </div>
+
+    <div class = "slider-container">
+      <label for="purpleSlide">Forearm</label>
+      <input id="purpleSlide" type="range" min="-180" max="-90" value="-90">
+      Animation
+      <!-- <button type="button" id="animationPurpleOnButton">On</button>
+      <button type="button" id="animationPurpleOffButton">Off</button> -->
+    </div>
+
+    <div class = "slider-container">
+      <label for="feetSlide">feetSlide</label>
+      <input id="feetSlide" type="range" min="-10" max="10" value="0">
+      Animation
+      <button type="button" id="feetSlideOn">On</button>
+      <button type="button" id="feetSlideOff">Off</button>
+    </div>
+
+    <div class = "slider-container">
+      Tail Animation (triple joint, should work with shift click)
+      <button type="button" id="tailOn">On</button>
+      <button type="button" id="tailOff">Off</button>
+    </div>
+
+
+
+<!-- 
+    <div class="slider-container">
+      <label for="redSlide">Red</label>
+      <input type="range" min="0" max="100" value="100" class="slider" id="redSlide">
+      <input type="number" min="0" max="100" value="100" id="redInput">
+
+      <label for="greenSlide">Green</label>
+      <input type="range" min="0" max="100" value="100" class="slider" id="greenSlide">
+      <input type="number" min="0" max="100" value="100" id="greenInput">
+
+      <label for="blueSlide">Blue</label>
+      <input type="range" min="0" max="100" value="100" class="slider" id="blueSlide">
+      <input type="number" min="0" max="100" value="100" id="blueInput">
+    </div> -->
+
+    <!-- <div class="slider-container">
+      <label for="sizeSlider">Shape Size</label>
+      <input id="sizeSlider" type="range" min="1" max="50" value="10">
+      <input id="sizeInput" type="number" min="1" max="50" value="10">
+    </div> -->
+
+    <script src="../lib/webgl-utils.js"></script>
+    <script src="../lib/webgl-debug.js"></script>
+    <script src="../lib/cuon-utils.js"></script>
+    <script src="../lib/cuon-matrix-cse160.js"></script>
+    <script src="Triangle.js"></script>
+    <script src="Circle.js"></script>
+    <script src="Points.js"></script>
+    <script src="Cube.js"></script>
+    <script src="Sphere.js"></script>
+    <script src="World.js"></script>
+    
+
+
+  </body>
+</html>
