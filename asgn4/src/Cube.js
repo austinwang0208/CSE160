@@ -62,32 +62,32 @@ class Cube {
         // Front face
         vertices.push(0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0);
         uvs.push(0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1);
-        gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]); // Set color for face
+        // gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]); // Set color for face
         
         // Back face
         vertices.push(1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1);
         uvs.push(1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1);
-        gl.uniform4f(u_FragColor, rgba[0] * 0.95, rgba[1] * 0.95, rgba[2] * 0.95, rgba[3]);
+        // gl.uniform4f(u_FragColor, rgba[0] * 0.95, rgba[1] * 0.95, rgba[2] * 0.95, rgba[3]);
     
         // Right face
         vertices.push(1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1);
         uvs.push(0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1);
-        gl.uniform4f(u_FragColor, rgba[0] * 0.9, rgba[1] * 0.9, rgba[2] * 0.9, rgba[3]);
+        // gl.uniform4f(u_FragColor, rgba[0] * 0.9, rgba[1] * 0.9, rgba[2] * 0.9, rgba[3]);
     
         // Left face
         vertices.push(0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1);
         uvs.push(0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0);
-        gl.uniform4f(u_FragColor, rgba[0] * 0.85, rgba[1] * 0.85, rgba[2] * 0.85, rgba[3]);
+        // gl.uniform4f(u_FragColor, rgba[0] * 0.85, rgba[1] * 0.85, rgba[2] * 0.85, rgba[3]);
     
         // Top face
         vertices.push(0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0);
         uvs.push(0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0);
-        gl.uniform4f(u_FragColor, rgba[0] * 0.75, rgba[1] * 0.75, rgba[2] * 0.75, rgba[3]);
+        // gl.uniform4f(u_FragColor, rgba[0] * 0.75, rgba[1] * 0.75, rgba[2] * 0.75, rgba[3]);
     
         // Bottom face
         vertices.push(0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1);
         uvs.push(0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1);
-        gl.uniform4f(u_FragColor, rgba[0] * 0.8, rgba[1] * 0.8, rgba[2] * 0.8, rgba[3]);
+        // gl.uniform4f(u_FragColor, rgba[0] * 0.8, rgba[1] * 0.8, rgba[2] * 0.8, rgba[3]);
     
     
         drawTriangle3DUV(vertices, uvs);

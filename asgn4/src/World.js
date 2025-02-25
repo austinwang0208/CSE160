@@ -16,7 +16,7 @@ var VSHADER_SOURCE = `
         gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
         v_UV = a_UV;
         v_Normal = a_Normal;
-        v_VertPos = vec4(u_ModelMatrix * a_Position);
+        v_VertPos = u_ModelMatrix * a_Position;
     }`
 
 // Fragment shader program
@@ -25,6 +25,7 @@ var FSHADER_SOURCE = `
     varying vec2 v_UV;
     varying vec3 v_Normal;
     varying vec4 v_VertPos;
+    uniform vec3 u_cameraPos;
     uniform vec4 u_FragColor;
     uniform sampler2D u_Sampler0;
     uniform sampler2D u_Sampler1;
@@ -33,6 +34,7 @@ var FSHADER_SOURCE = `
     uniform sampler2D u_Sampler4;
     uniform int u_whichTexture;
     uniform vec3 u_lightPos;
+    uniform bool u_lightOn;
     void main() {
         if (u_whichTexture == 0) {                   // Use color
             gl_FragColor = u_FragColor;
@@ -66,25 +68,31 @@ var FSHADER_SOURCE = `
         vec3 lightVector = u_lightPos - vec3(v_VertPos);
         float r = length(lightVector);
     
-        // if (r < 1.0) {
-        //     gl_FragColor = vec4(1, 0, 0, 1);
-        // } else if (r < 2.0) {
-        //     gl_FragColor = vec4(0, 1, 0, 1);
-        // }
-
-        // gl_FragColor= vec4(vec3(gl_FragColor)/(r*r), 1);
 
         vec3 L = normalize(lightVector);
         vec3 N = normalize(v_Normal);
         float nDotL = max(dot(N, L), 0.0);
 
-        vec3 diffuse = vec3(gl_FragColor) * max(nDotL, 0.0);
-        vec3 ambient = vec3(gl_FragColor) * 0.3;
-        gl_FragColor = vec4(diffuse + ambient, 1.0);
+        
+        // Specular Calculation
+        vec3 R = reflect(-L, N);
+        vec3 V = normalize(u_cameraPos - vec3(v_VertPos));
+        float specAmount = pow(max(dot(V, R), 0.0), 64.0) * 0.8;
+        vec3 specular = vec3(1.0) * specAmount; 
 
-        // gl_FragColor = gl_FragColor * nDotL;
-        // gl_FragColor.a = 1.0;
+        vec3 diffuse = vec3(1.0,1.0,0.9) * vec3(gl_FragColor) * nDotL * 0.7;
+        vec3 ambient = vec3(gl_FragColor) * 0.2;
 
+        if (u_lightOn) {
+            if (u_whichTexture == 0) {
+                gl_FragColor = vec4(specular + diffuse + ambient, 1.0);
+            } else{
+                gl_FragColor = vec4(diffuse + ambient, 1.0);
+            }
+        }
+
+
+        // gl_FragColor = vec4(diffuse + ambient + specular, 1.0);
     }`
 
 // global
@@ -106,7 +114,9 @@ let u_Sampler3;
 let u_Sampler4;
 let u_whichTexture;
 let u_lightPos;
-let g_lightPos=[0, 1, -2];
+let g_lightPos=[0, 1, 1];
+let u_cameraPos;
+let u_lightOn;
 
 function setupWebGL() {
     // Retrieve <canvas> element
@@ -154,9 +164,21 @@ function connectVariableToGLSL() {
         return;
     }
 
+    u_lightOn = gl.getUniformLocation(gl.program, 'u_lightOn');
+    if (!u_lightOn) {
+        console.log('Failed to get the storage location of u_lightOn');
+        return;
+    }
+
     u_lightPos = gl.getUniformLocation(gl.program, 'u_lightPos');
     if (!u_lightPos) {
         console.log('Failed to get the storage location of u_lightPos');
+        return;
+    }
+
+    u_cameraPos = gl.getUniformLocation(gl.program, 'u_cameraPos');
+    if (!u_cameraPos) {
+        console.log('Failed to get the storage location of u_cameraPos');
         return;
     }
 
@@ -383,9 +405,14 @@ function getRandomPosition() {
 
 
 let g_normalOn = false;
+let g_lightOn = true;
 
 
 function addActionsforHTMLUI(){
+
+    document.getElementById('lightOn').onclick = function() { g_lightOn = true };
+    document.getElementById('lightOff').onclick = function() { g_lightOn = false };
+
 
     // document.getElementById('drawTrianglesButton').addEventListener('click', renderAllTriangles);
     document.getElementById('normalOn').onclick = function() { g_normalOn = true };
@@ -696,6 +723,7 @@ function drawPsyduckFace(matrix) {
 
     const face = new Sphere();
     face.color = [1.0, 0.85, 0.25, 1.0];
+    if (g_normalOn) face.textureNum = -3
     face.matrix.set(matrix);
     face.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
     face.matrix.scale(1.5, 1.2, 1.3);
@@ -703,6 +731,7 @@ function drawPsyduckFace(matrix) {
 
     const hair1 = new Cube();
     hair1.color = [0, 0, 0, 1.0]; 
+    if (g_normalOn) hair1.textureNum = -3
     hair1.matrix.set(matrix);
     hair1.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
     hair1.matrix.scale(0.05, 0.7, 0.05); 
@@ -711,7 +740,7 @@ function drawPsyduckFace(matrix) {
 
     const hair2 = new Cube();
     hair2.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
-
+    if (g_normalOn) hair2.textureNum = -3
     hair2.color = [0, 0, 0, 1.0];  
     hair2.matrix.set(matrix);
 
@@ -724,6 +753,7 @@ function drawPsyduckFace(matrix) {
     hair2.render();
 
     const hair3 = new Cube();
+    if (g_normalOn) hair3.textureNum = -3
     hair3.color = [0, 0, 0, 1.0];  
     hair3.matrix.set(matrix);
     hair3.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -738,6 +768,7 @@ function drawPsyduckFace(matrix) {
     const beak = new Sphere();
     beak.color = [0.9, 0.9, 0.7, 0.9];
     beak.matrix.set(matrix);
+    if (g_normalOn) beak.textureNum = -3
     beak.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
     beak.matrix.rotate(7, 1, 0, 0);
     beak.matrix.translate(0, -0.5, 1.5); 
@@ -746,6 +777,7 @@ function drawPsyduckFace(matrix) {
 
 
     const beakopen = new Sphere();
+    if (g_normalOn) beakopen.textureNum = -3
     beakopen.color = [0, 0, 0, 1];
     beakopen.matrix.set(matrix);
     beakopen.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -756,6 +788,7 @@ function drawPsyduckFace(matrix) {
 
     // gl.uniform1i(u_whichTexture, 2)
     const eye = new Sphere();
+    if (g_normalOn) eye.textureNum = -3
     eye.color = [1.0, 1.0, 1.0, 1.0]; 
     eye.matrix.set(matrix);
     eye.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -767,6 +800,7 @@ function drawPsyduckFace(matrix) {
     const eye2 = new Sphere();
     eye2.color = [1.0, 1.0, 1.0, 1.0];
     eye2.matrix.set(matrix);
+    if (g_normalOn) eye2.textureNum = -3
     eye2.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
     eye2.matrix.translate(0.5, 0.3, 1);
     eye2.matrix.scale(0.4, 0.3, 0.4);
@@ -774,6 +808,7 @@ function drawPsyduckFace(matrix) {
 
     const pupil = new Sphere();
     pupil.color = [0.0, 0.0, 0.0, 1.0];
+    if (g_normalOn) pupil.textureNum = -3
     pupil.matrix.set(matrix);
     pupil.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
 
@@ -783,6 +818,7 @@ function drawPsyduckFace(matrix) {
 
     const pupil2 = new Sphere();
     pupil2.color = [0.0, 0.0, 0.0, 1.0];
+    if (g_normalOn) pupil2.textureNum = -3
     pupil2.matrix.set(matrix);
     pupil2.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
 
@@ -799,7 +835,8 @@ function drawPsyduckBody(matrix) {
 
     // Torso
     const torso = new Sphere();
-    torso.textureNum = 0;
+    // torso.textureNum = 0;
+    if (g_normalOn) torso.textureNum = -3
     torso.color = [1.0, 0.8, 0.2, 1.0];
     torso.matrix.set(matrix);
     torso.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -810,6 +847,7 @@ function drawPsyduckBody(matrix) {
 
     // Left Arm
     const leftArm = new Sphere();
+    if (g_normalOn) leftArm.textureNum = -3
     leftArm.color = [1.0, 0.82, 0.25, 1.0];
     leftArm.matrix.set(matrix);
     leftArm.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -821,6 +859,7 @@ function drawPsyduckBody(matrix) {
     leftArm.render();
 
     const leftArm2 = new Sphere();
+    if (g_normalOn) leftArm2.textureNum = -3
     leftArm2.color = [1.0, 0.82, 0.25, 1.0];
     leftArm2.matrix = new Matrix4(leftArmMat); 
     leftArm2.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -836,6 +875,7 @@ function drawPsyduckBody(matrix) {
 
 
     const rightArm = new Sphere();
+    if (g_normalOn) rightArm.textureNum = -3
     rightArm.color = [1.0, 0.82, 0.25, 1.0];
     rightArm.matrix.set(matrix);
     rightArm.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -847,6 +887,7 @@ function drawPsyduckBody(matrix) {
     rightArm.render();
 
     const rightArm2 = new Sphere();
+    if (g_normalOn) rightArm2.textureNum = -3
     rightArm2.color = [1.0, 0.82, 0.25, 1.0];
     rightArm2.matrix = new Matrix4(rightArmMatrix);
     rightArm2.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -863,6 +904,7 @@ function drawPsyduckBody(matrix) {
     //feet
     // Feet 1
     const feet1 = new Sphere();
+    if (g_normalOn) feet1.textureNum = -3
     feet1.color = [0.9, 0.9, 0.7, 0.9];
     feet1.matrix.set(matrix);
     feet1.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -882,6 +924,7 @@ function drawPsyduckBody(matrix) {
 
     // Feet 2 (Mirrored)
     const feet2 = new Sphere();
+    if (g_normalOn) feet2.textureNum = -3
     feet2.color = [0.9, 0.9, 0.7, 0.9];
     feet2.matrix.set(matrix);
     feet2.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -897,6 +940,7 @@ function drawPsyduckBody(matrix) {
 
     // TAIL
     const tail = new Sphere();
+    if (g_normalOn) tail.textureNum = -3
     tail.color = [1.0, 0.85, 0.25, 1.0];
     tail.matrix.set(matrix);
     tail.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -908,6 +952,7 @@ function drawPsyduckBody(matrix) {
 
     //2
     const tail2 = new Sphere();
+    if (g_normalOn) tail2.textureNum = -3
     tail2.color = [1.0, 0.85, 0.25, 1.0];
     tail2.matrix = tailMatrix;
     tail2.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -920,6 +965,7 @@ function drawPsyduckBody(matrix) {
 
     //3
     const tail3 = new Sphere();
+    if (g_normalOn) tail3.textureNum = -3
     tail3.color = [1.0, 0.85, 0.25, 1.0];
     tail3.matrix = tail2Matrix;
     tail3.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -976,28 +1022,32 @@ function drawTestCube() {
     var body = new Cube();
     body.color = [1.0, 0.5, 0.5, 1.0];
     if (g_normalOn) body.textureNum = -3;
-    body.matrix.translate(.25, -1.75, -1.0);
+    body.matrix.translate(.25, -1.75, .5);
     body.matrix.rotate(-5, 1, 0, 0);
     body.matrix.scale(0.5, .3, .5);
     body.render();
 
 
     var sphere = new Sphere();
-    sphere.color = [1.0, 0.5, 0.5, 1.0];
+    sphere.color = [1, 0, 0, 1.0]; //[1.0, 0.5, 0.5, 1.0]
     if (g_normalOn) sphere.textureNum = -3;
-    sphere.matrix.translate(-.25, -1, -1.0);
+    sphere.matrix.translate(-.25, -1, 1.0);
     sphere.matrix.rotate(-5, 1, 0, 0);
     sphere.matrix.scale(0.3, .3, .3);
     sphere.render();
 
     gl.uniform3f(u_lightPos, g_lightPos[0], g_lightPos[1], g_lightPos[2]);
 
+
+    gl.uniform3f(u_cameraPos, g_eye[0], g_eye[1], g_eye[2]);
+
+    gl.uniform1i(u_lightOn, g_lightOn);
     // Draw the light
     var light = new Cube();
     light.color = [2, 2, 0, 1];
     light.matrix.translate(g_lightPos[0], g_lightPos[1], g_lightPos[2]);
-    // light.matrix.scale(-.1, -.1, -.1);
-    light.matrix.scale(.1, .1, .1);
+    light.matrix.scale(-.1, -.1, -.1);
+    // light.matrix.scale(.1, .1, .1);
     light.matrix.translate(-.5, -.5, -.5);
     light.render();
 
@@ -1158,8 +1208,8 @@ function renderAllShapes() {
 
 //   drawGround();
   drawTestCube();
-//   drawPsyduckFace(faceMatrix);
-//   drawPsyduckBody(faceMatrix);
+  drawPsyduckFace(faceMatrix);
+  drawPsyduckBody(faceMatrix);
 //   drawSky();
 //   drawMap()
 
