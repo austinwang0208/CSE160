@@ -86,8 +86,37 @@ var FSHADER_SOURCE = `
         if (u_lightOn) {
             if (u_whichTexture == 0) {
                 gl_FragColor = vec4(specular + diffuse + ambient, 1.0);
-            } else{
+            } else {
                 gl_FragColor = vec4(diffuse + ambient, 1.0);
+            }
+        } else {
+            if (u_whichTexture == 0) {                   // Use color
+                gl_FragColor = u_FragColor;
+              
+              } else if (u_whichTexture == -3) {
+                gl_FragColor = vec4((v_Normal+1.0)/2.0, 1.0); //pow((v_Normal + 1.0) / 2.0, vec3(2.0))
+    
+              } else if (u_whichTexture == -1) {           // Use UV debug color
+                gl_FragColor = vec4(v_UV,1.0,1.0);
+              
+              } else if (u_whichTexture == 1) {            // Use texture0 (sky)
+                gl_FragColor = texture2D(u_Sampler0, v_UV);
+              
+              } else if (u_whichTexture == 2) {            // Use texture1 (grass)
+                gl_FragColor = texture2D(u_Sampler1, v_UV);
+    
+              } else if (u_whichTexture == 3) {
+                gl_FragColor = texture2D(u_Sampler2, v_UV); //trunk
+    
+              } else if (u_whichTexture == 4) {
+                gl_FragColor = texture2D(u_Sampler3, v_UV); //sand
+    
+              } else if (u_whichTexture == 5) {
+                gl_FragColor = texture2D(u_Sampler4, v_UV); //leaves
+    
+              }else {                                     // Error, put Redish
+                gl_FragColor = vec4(1, .2, .2, 1);
+              
             }
         }
 
@@ -989,8 +1018,9 @@ function drawGround() {
     var body = new Cube();
     body.color = [1.0, 0, 0, 1];
     body.textureNum = 2; // 1 grass 0 sky, else weird color
+    if (g_normalOn) body.textureNum = -3;
 
-    body.matrix.translate(0, -.75, 0.0);
+    body.matrix.translate(0, -2, 0);
     body.matrix.scale(50, 0, 50); // (50x50)
 
     body.matrix.translate(-.5, 0, -0.5); 
@@ -1013,7 +1043,7 @@ function drawSky() {
 function drawTestCube() {
     var sky = new Cube();
     sky.color = [0.8, 0.8, 0.8, 1.0];
-    if (g_normalOn) sky.textureNum = -3;
+    sky.textureNum = g_normalOn ? -3 : 2;
     sky.matrix.scale(-5, -5, -5);
     sky.matrix.translate(-.5, -.5, -0.5);
     sky.render();
@@ -1021,7 +1051,7 @@ function drawTestCube() {
     // Draw the body cube
     var body = new Cube();
     body.color = [1.0, 0.5, 0.5, 1.0];
-    if (g_normalOn) body.textureNum = -3;
+    body.textureNum = g_normalOn ? -3 : 3;
     body.matrix.translate(.25, -1.75, .5);
     body.matrix.rotate(-5, 1, 0, 0);
     body.matrix.scale(0.5, .3, .5);
@@ -1061,10 +1091,6 @@ for (let x = 0; x < 50; x++) {
     for (let y = 0; y < 50; y++) {
         // Example: Random terrain
         g_map[x][y] = Math.random() < 0.3 ? (Math.random() * 3 + 1) : 0; // Hills or flat
-        // Example: All flat
-        // g_map[x][y] = 0;
-        // Example: Checkerboard pattern
-        // g_map[x][y] = (x + y) % 2; 
 
     }
 }
@@ -1166,10 +1192,13 @@ function drawMap() {
 
 
 
+// var g_eye = [0, 0, 3];
+// var g_at = [0, 0, 0];
+// var g_up = [0, 0, 0];
+
 var g_eye = [0, 0, 3];
 var g_at = [0, 0, -1];
 var g_up = [0, 1, 0];
-
 // const psyduckPosition = getRandomPosition();
 
 function renderAllShapes() {
@@ -1208,8 +1237,8 @@ function renderAllShapes() {
 
 //   drawGround();
   drawTestCube();
-  drawPsyduckFace(faceMatrix);
-  drawPsyduckBody(faceMatrix);
+//   drawPsyduckFace(faceMatrix);
+//   drawPsyduckBody(faceMatrix);
 //   drawSky();
 //   drawMap()
 
