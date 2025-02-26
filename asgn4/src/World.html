@@ -18,6 +18,18 @@
     <!-- <img src="CSE160Dog.png" alt="DogImage" width="400" height="400"> -->
 
     <p id="numdot">XXX</p>
+    <p>NOTE TO GRADER</p>
+    <p>rendering my animal makes it lagging sometimes to I made the option for you to
+      spawn the psduck for that part of the grading, all other parts of the grading you 
+      can just despawn the psyduck so it's easier to grade
+    </p>
+
+    <div class = "slider-container">
+      <label for="renderOn">Render Animal:</label>
+      <button type="button" id="renderOn">Yes</button>
+      <button type="button" id="renderOff">No</button>
+
+    </div>
 
 
     <div class = "slider-container">
@@ -28,7 +40,11 @@
       <input id="lightSlideY" type="range" min="-250" max="250" value="100">
 
       <label for="lightSlideZ">Light Z</label>
-      <input id="lightSlideZ" type="range" min="-250" max="250" value="0">
+      <input id="lightSlideZ" type="range" min="-250" max="250" value="100">
+
+      <label for="lightAuto">Light Settings:</label>
+      <button type="button" id="manualMove">Auto</button>
+      <button type="button" id="autoMove">Manual</button>
 
     </div>
 
@@ -36,15 +52,30 @@
       <label for="lightOn">Light:</label>
       <button type="button" id="lightOn">On</button>
       <button type="button" id="lightOff">Off</button>
+
+      <label for="spotlightOn">Spotlight:</label>
+      <button type="button" id="spotlightOn">On</button>
+      <button type="button" id="spotlightOff">Off</button>
     </div>
 
+    <div class = "slider-container">
+      Normal:
+      <button type="button" id="normalOn">On</button>
+      <button type="button" id="normalOff">Off</button>
+    </div>
+    
+    <div>
+    
+      <br>
+      <br>
+      <br>
+      <br>
+      <p> OTHER CONTROLS </p>
+    </div>
 
     <div class = "slider-container">
       <label for="size">Psyduck Size</label>
       <input id="size" type="range" min="1" max="5" value="1">
-      Normal
-      <button type="button" id="normalOn">On</button>
-      <button type="button" id="normalOff">Off</button>
     </div>
 
 

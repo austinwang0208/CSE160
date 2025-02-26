@@ -21,108 +21,101 @@ var VSHADER_SOURCE = `
 
 // Fragment shader program
 var FSHADER_SOURCE = `
-    precision mediump float;
-    varying vec2 v_UV;
-    varying vec3 v_Normal;
-    varying vec4 v_VertPos;
-    uniform vec3 u_cameraPos;
-    uniform vec4 u_FragColor;
-    uniform sampler2D u_Sampler0;
-    uniform sampler2D u_Sampler1;
-    uniform sampler2D u_Sampler2;
-    uniform sampler2D u_Sampler3;
-    uniform sampler2D u_Sampler4;
-    uniform int u_whichTexture;
-    uniform vec3 u_lightPos;
-    uniform bool u_lightOn;
-    void main() {
-        if (u_whichTexture == 0) {                   // Use color
-            gl_FragColor = u_FragColor;
-          
-          } else if (u_whichTexture == -3) {
-            gl_FragColor = vec4((v_Normal+1.0)/2.0, 1.0); //pow((v_Normal + 1.0) / 2.0, vec3(2.0))
+precision mediump float;
+varying vec2 v_UV;
+varying vec3 v_Normal;
+varying vec4 v_VertPos;
+uniform vec3 u_cameraPos;
+uniform vec4 u_FragColor;
+uniform sampler2D u_Sampler0;
+uniform sampler2D u_Sampler1;
+uniform sampler2D u_Sampler2;
+uniform sampler2D u_Sampler3;
+uniform sampler2D u_Sampler4;
+uniform int u_whichTexture;
+uniform vec3 u_lightPos;
+uniform bool u_lightOn;
 
-          } else if (u_whichTexture == -1) {           // Use UV debug color
-            gl_FragColor = vec4(v_UV,1.0,1.0);
-          
-          } else if (u_whichTexture == 1) {            // Use texture0 (sky)
-            gl_FragColor = texture2D(u_Sampler0, v_UV);
-          
-          } else if (u_whichTexture == 2) {            // Use texture1 (grass)
-            gl_FragColor = texture2D(u_Sampler1, v_UV);
+// Spotlight uniforms
+uniform vec3 u_spotLightPos;
+uniform vec3 u_spotLightDir;
+uniform float u_spotLightCutoff;
+uniform float u_spotLightExponent;
+uniform bool u_spotLightOn;
 
-          } else if (u_whichTexture == 3) {
-            gl_FragColor = texture2D(u_Sampler2, v_UV); //trunk
+void main() {
+    vec4 baseColor;
+    if (u_whichTexture == 0) {
+        baseColor = u_FragColor;
+    } else if (u_whichTexture == -3) {
+        baseColor = vec4((v_Normal + 1.0) / 2.0, 1.0);
+    } else if (u_whichTexture == -1) {
+        baseColor = vec4(v_UV, 1.0, 1.0);
+    } else if (u_whichTexture == 1) {
+        baseColor = texture2D(u_Sampler0, v_UV);
+    } else if (u_whichTexture == 2) {
+        baseColor = texture2D(u_Sampler1, v_UV);
+    } else if (u_whichTexture == 3) {
+        baseColor = texture2D(u_Sampler2, v_UV);
+    } else if (u_whichTexture == 4) {
+        baseColor = texture2D(u_Sampler3, v_UV);
+    } else if (u_whichTexture == 5) {
+        baseColor = texture2D(u_Sampler4, v_UV);
+    } else {
+        baseColor = vec4(1, .2, .2, 1);
+    }
 
-          } else if (u_whichTexture == 4) {
-            gl_FragColor = texture2D(u_Sampler3, v_UV); //sand
+    vec3 lightVector = u_lightPos - vec3(v_VertPos);
+    vec3 L = normalize(lightVector);
+    vec3 N = normalize(v_Normal);
+    float nDotL = max(dot(N, L), 0.0);
 
-          } else if (u_whichTexture == 5) {
-            gl_FragColor = texture2D(u_Sampler4, v_UV); //leaves
+    vec3 R = reflect(-L, N);
+    vec3 V = normalize(u_cameraPos - vec3(v_VertPos));
+    float specAmount = pow(max(dot(V, R), 0.0), 64.0) * 0.8;
+    vec3 specular = vec3(1.0) * specAmount;
 
-          }else {                                     // Error, put Redish
-            gl_FragColor = vec4(1, .2, .2, 1);
-          
-        }
+    vec3 diffuse = vec3(1.0, 1.0, 0.9) * vec3(baseColor) * nDotL * 0.7;
+    vec3 ambient = vec3(baseColor) * 0.2;
 
-        vec3 lightVector = u_lightPos - vec3(v_VertPos);
-        float r = length(lightVector);
-    
+    vec3 finalColor = vec3(baseColor);
 
-        vec3 L = normalize(lightVector);
-        vec3 N = normalize(v_Normal);
-        float nDotL = max(dot(N, L), 0.0);
-
-        
-        // Specular Calculation
-        vec3 R = reflect(-L, N);
-        vec3 V = normalize(u_cameraPos - vec3(v_VertPos));
-        float specAmount = pow(max(dot(V, R), 0.0), 64.0) * 0.8;
-        vec3 specular = vec3(1.0) * specAmount; 
-
-        vec3 diffuse = vec3(1.0,1.0,0.9) * vec3(gl_FragColor) * nDotL * 0.7;
-        vec3 ambient = vec3(gl_FragColor) * 0.2;
-
-        if (u_lightOn) {
-            if (u_whichTexture == 0) {
-                gl_FragColor = vec4(specular + diffuse + ambient, 1.0);
-            } else {
-                gl_FragColor = vec4(diffuse + ambient, 1.0);
-            }
+    if (u_lightOn) {
+        if (u_whichTexture == 0) {
+            finalColor = specular + diffuse + ambient;
         } else {
-            if (u_whichTexture == 0) {                   // Use color
-                gl_FragColor = u_FragColor;
-              
-              } else if (u_whichTexture == -3) {
-                gl_FragColor = vec4((v_Normal+1.0)/2.0, 1.0); //pow((v_Normal + 1.0) / 2.0, vec3(2.0))
-    
-              } else if (u_whichTexture == -1) {           // Use UV debug color
-                gl_FragColor = vec4(v_UV,1.0,1.0);
-              
-              } else if (u_whichTexture == 1) {            // Use texture0 (sky)
-                gl_FragColor = texture2D(u_Sampler0, v_UV);
-              
-              } else if (u_whichTexture == 2) {            // Use texture1 (grass)
-                gl_FragColor = texture2D(u_Sampler1, v_UV);
-    
-              } else if (u_whichTexture == 3) {
-                gl_FragColor = texture2D(u_Sampler2, v_UV); //trunk
-    
-              } else if (u_whichTexture == 4) {
-                gl_FragColor = texture2D(u_Sampler3, v_UV); //sand
-    
-              } else if (u_whichTexture == 5) {
-                gl_FragColor = texture2D(u_Sampler4, v_UV); //leaves
-    
-              }else {                                     // Error, put Redish
-                gl_FragColor = vec4(1, .2, .2, 1);
-              
+            finalColor = diffuse + ambient;
+        }
+    }
+
+    // Spotlight calculation
+    if (u_spotLightOn) {
+        vec3 spotLightVector = u_spotLightPos - vec3(v_VertPos);
+        vec3 spotL = normalize(spotLightVector);
+        float spotDot = dot(normalize(u_spotLightDir), -spotL);
+
+        if (spotDot > u_spotLightCutoff) {
+            float distance = length(spotLightVector);
+            float attenuation = 1.0 / (1.0 + 0.02 * distance + 0.001 * distance * distance);
+            float spotFactor = pow(spotDot, u_spotLightExponent) * attenuation;
+            float spotNDotL = max(dot(N, spotL), 0.0);
+
+            vec3 spotR = reflect(-spotL, N);
+            float spotSpecAmount = pow(max(dot(V, spotR), 0.0), 64.0) * 0.8;
+            vec3 spotSpecular = vec3(1.0) * spotSpecAmount;
+
+            vec3 spotDiffuse = vec3(1.0, 1.0, 0.9) * vec3(baseColor) * spotNDotL * 0.7 * spotFactor;
+
+            if (u_whichTexture == 0) {
+                finalColor += spotSpecular + spotDiffuse;
+            } else {
+                finalColor += spotDiffuse;
             }
         }
+    }
 
-
-        // gl_FragColor = vec4(diffuse + ambient + specular, 1.0);
-    }`
+    gl_FragColor = vec4(finalColor, 1.0);
+}`
 
 // global
 let canvas;
@@ -146,6 +139,13 @@ let u_lightPos;
 let g_lightPos=[0, 1, 1];
 let u_cameraPos;
 let u_lightOn;
+let g_autoMove = true;
+
+let u_spotLightPos;
+let u_spotLightDir;
+let u_spotLightCutoff;
+let u_spotLightExponent;
+let u_spotLightOn;
 
 function setupWebGL() {
     // Retrieve <canvas> element
@@ -281,6 +281,13 @@ function connectVariableToGLSL() {
         console.log('Failed to get the storage location of u_ProjectionMatrix');
         return;
     }
+
+    u_spotLightPos = gl.getUniformLocation(gl.program, 'u_spotLightPos');
+    u_spotLightDir = gl.getUniformLocation(gl.program, 'u_spotLightDir');
+    u_spotLightCutoff = gl.getUniformLocation(gl.program, 'u_spotLightCutoff');
+    u_spotLightExponent = gl.getUniformLocation(gl.program, 'u_spotLightExponent');
+    u_spotLightOn = gl.getUniformLocation(gl.program, 'u_spotLightOn');
+
     var identityM = new Matrix4();
     gl.uniformMatrix4fv(u_ModelMatrix, false, identityM.elements);
     
@@ -437,10 +444,33 @@ let g_normalOn = false;
 let g_lightOn = true;
 
 
+
+// Spotlight properties
+var g_spotLightPos = [0, 0, 0];
+var g_spotLightDir = [-2, -1, -1]; // Pointing down
+var g_spotLightCutoff = Math.cos(Math.PI / 6); // 30-degree cutoff
+var g_spotLightExponent = 10.0;
+var g_spotLightOn = true;
+
+let g_renderPsyduck = false;
+
+
 function addActionsforHTMLUI(){
+
+
+
+    document.getElementById('renderOn').onclick = function() { g_renderPsyduck = true };
+    document.getElementById('renderOff').onclick = function() { g_renderPsyduck = false };
+    
+    document.getElementById('manualMove').onclick = function() { g_autoMove = true };
+    document.getElementById('autoMove').onclick = function() { g_autoMove = false };
 
     document.getElementById('lightOn').onclick = function() { g_lightOn = true };
     document.getElementById('lightOff').onclick = function() { g_lightOn = false };
+
+
+    document.getElementById('spotlightOn').onclick = function() { g_spotLightOn = true };
+    document.getElementById('spotlightOff').onclick = function() { g_spotLightOn = false };
 
 
     // document.getElementById('drawTrianglesButton').addEventListener('click', renderAllTriangles);
@@ -526,7 +556,7 @@ function initTextures() {
       sandImage.onload = function() {
         sendTextureToTEXTURE3(sandImage);
     }
-    sandImage.src = 'sand.jpg'; 
+    sandImage.src = 'yellow2.png'; 
 
 
 
@@ -539,7 +569,7 @@ function initTextures() {
       leavesImage.onload = function() {
         sendTextureToTEXTURE4(leavesImage);
     }
-    leavesImage.src = 'leaves.png'; 
+    leavesImage.src = 'yellow.png'; 
     //can add more textures
     return true;
   }
@@ -742,7 +772,10 @@ function updateAnimationAngles() {
         g_tailAngle= (10*Math.sin(3*g_seconds));
     }
 
-    g_lightPos[0] = Math.cos(g_seconds);
+    if (g_autoMove) {
+        g_lightPos[0] = Math.cos(g_seconds);
+    }
+
 }
 
 function drawPsyduckFace(matrix) {
@@ -752,7 +785,8 @@ function drawPsyduckFace(matrix) {
 
     const face = new Sphere();
     face.color = [1.0, 0.85, 0.25, 1.0];
-    if (g_normalOn) face.textureNum = -3
+    // if (g_normalOn) face.textureNum = -3
+    face.textureNum = g_normalOn ? -3 : 5;
     face.matrix.set(matrix);
     face.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
     face.matrix.scale(1.5, 1.2, 1.3);
@@ -797,7 +831,7 @@ function drawPsyduckFace(matrix) {
     const beak = new Sphere();
     beak.color = [0.9, 0.9, 0.7, 0.9];
     beak.matrix.set(matrix);
-    if (g_normalOn) beak.textureNum = -3
+    beak.textureNum = g_normalOn ? -3 : 4;
     beak.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
     beak.matrix.rotate(7, 1, 0, 0);
     beak.matrix.translate(0, -0.5, 1.5); 
@@ -865,7 +899,7 @@ function drawPsyduckBody(matrix) {
     // Torso
     const torso = new Sphere();
     // torso.textureNum = 0;
-    if (g_normalOn) torso.textureNum = -3
+    torso.textureNum = g_normalOn ? -3 : 5;
     torso.color = [1.0, 0.8, 0.2, 1.0];
     torso.matrix.set(matrix);
     torso.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -876,7 +910,7 @@ function drawPsyduckBody(matrix) {
 
     // Left Arm
     const leftArm = new Sphere();
-    if (g_normalOn) leftArm.textureNum = -3
+    leftArm.textureNum = g_normalOn ? -3 : 5;
     leftArm.color = [1.0, 0.82, 0.25, 1.0];
     leftArm.matrix.set(matrix);
     leftArm.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -888,7 +922,7 @@ function drawPsyduckBody(matrix) {
     leftArm.render();
 
     const leftArm2 = new Sphere();
-    if (g_normalOn) leftArm2.textureNum = -3
+    leftArm2.textureNum = g_normalOn ? -3 : 5;
     leftArm2.color = [1.0, 0.82, 0.25, 1.0];
     leftArm2.matrix = new Matrix4(leftArmMat); 
     leftArm2.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -904,7 +938,7 @@ function drawPsyduckBody(matrix) {
 
 
     const rightArm = new Sphere();
-    if (g_normalOn) rightArm.textureNum = -3
+    rightArm.textureNum = g_normalOn ? -3 : 5;
     rightArm.color = [1.0, 0.82, 0.25, 1.0];
     rightArm.matrix.set(matrix);
     rightArm.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -916,7 +950,7 @@ function drawPsyduckBody(matrix) {
     rightArm.render();
 
     const rightArm2 = new Sphere();
-    if (g_normalOn) rightArm2.textureNum = -3
+    rightArm2.textureNum = g_normalOn ? -3 : 5;
     rightArm2.color = [1.0, 0.82, 0.25, 1.0];
     rightArm2.matrix = new Matrix4(rightArmMatrix);
     rightArm2.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -933,7 +967,7 @@ function drawPsyduckBody(matrix) {
     //feet
     // Feet 1
     const feet1 = new Sphere();
-    if (g_normalOn) feet1.textureNum = -3
+    feet1.textureNum = g_normalOn ? -3 : 4;
     feet1.color = [0.9, 0.9, 0.7, 0.9];
     feet1.matrix.set(matrix);
     feet1.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -953,7 +987,7 @@ function drawPsyduckBody(matrix) {
 
     // Feet 2 (Mirrored)
     const feet2 = new Sphere();
-    if (g_normalOn) feet2.textureNum = -3
+    feet2.textureNum = g_normalOn ? -3 : 4;
     feet2.color = [0.9, 0.9, 0.7, 0.9];
     feet2.matrix.set(matrix);
     feet2.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -969,7 +1003,7 @@ function drawPsyduckBody(matrix) {
 
     // TAIL
     const tail = new Sphere();
-    if (g_normalOn) tail.textureNum = -3
+    tail.textureNum = g_normalOn ? -3 : 5;
     tail.color = [1.0, 0.85, 0.25, 1.0];
     tail.matrix.set(matrix);
     tail.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -981,7 +1015,7 @@ function drawPsyduckBody(matrix) {
 
     //2
     const tail2 = new Sphere();
-    if (g_normalOn) tail2.textureNum = -3
+    tail2.textureNum = g_normalOn ? -3 : 5;
     tail2.color = [1.0, 0.85, 0.25, 1.0];
     tail2.matrix = tailMatrix;
     tail2.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -994,7 +1028,7 @@ function drawPsyduckBody(matrix) {
 
     //3
     const tail3 = new Sphere();
-    if (g_normalOn) tail3.textureNum = -3
+    tail3.textureNum = g_normalOn ? -3 : 5;
     tail3.color = [1.0, 0.85, 0.25, 1.0];
     tail3.matrix = tail2Matrix;
     tail3.matrix.scale(1 * g_globalSize, 1 * g_globalSize, 1 * g_globalSize); // Apply global scale
@@ -1051,7 +1085,7 @@ function drawTestCube() {
     // Draw the body cube
     var body = new Cube();
     body.color = [1.0, 0.5, 0.5, 1.0];
-    body.textureNum = g_normalOn ? -3 : 3;
+    body.textureNum = g_normalOn ? -3 : 3;1
     body.matrix.translate(.25, -1.75, .5);
     body.matrix.rotate(-5, 1, 0, 0);
     body.matrix.scale(0.5, .3, .5);
@@ -1059,8 +1093,9 @@ function drawTestCube() {
 
 
     var sphere = new Sphere();
-    sphere.color = [1, 0, 0, 1.0]; //[1.0, 0.5, 0.5, 1.0]
-    if (g_normalOn) sphere.textureNum = -3;
+    sphere.color = [1.0, 0.5, 0.5, 1.0]; //[1.0, 0.5, 0.5, 1.0]
+    // if (g_normalOn) sphere.textureNum = -3;
+    // sphere.textureNum = g_normalOn ? -3 : 4;
     sphere.matrix.translate(-.25, -1, 1.0);
     sphere.matrix.rotate(-5, 1, 0, 0);
     sphere.matrix.scale(0.3, .3, .3);
@@ -1080,6 +1115,12 @@ function drawTestCube() {
     // light.matrix.scale(.1, .1, .1);
     light.matrix.translate(-.5, -.5, -.5);
     light.render();
+
+    gl.uniform3fv(u_spotLightPos, g_spotLightPos);
+    gl.uniform3fv(u_spotLightDir, g_spotLightDir);
+    gl.uniform1f(u_spotLightCutoff, g_spotLightCutoff);
+    gl.uniform1f(u_spotLightExponent, g_spotLightExponent);
+    gl.uniform1i(u_spotLightOn, g_spotLightOn);
 
 }
 
@@ -1237,8 +1278,12 @@ function renderAllShapes() {
 
 //   drawGround();
   drawTestCube();
-//   drawPsyduckFace(faceMatrix);
-//   drawPsyduckBody(faceMatrix);
+
+  if (g_renderPsyduck) {
+    drawPsyduckFace(faceMatrix);
+    drawPsyduckBody(faceMatrix);
+  }
+
 //   drawSky();
 //   drawMap()
 
