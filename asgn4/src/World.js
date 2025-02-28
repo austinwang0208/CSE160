@@ -35,6 +35,7 @@ uniform sampler2D u_Sampler4;
 uniform int u_whichTexture;
 uniform vec3 u_lightPos;
 uniform bool u_lightOn;
+uniform vec3 u_lightColor;
 
 // Spotlight uniforms
 uniform vec3 u_spotLightPos;
@@ -73,9 +74,9 @@ void main() {
     vec3 R = reflect(-L, N);
     vec3 V = normalize(u_cameraPos - vec3(v_VertPos));
     float specAmount = pow(max(dot(V, R), 0.0), 64.0) * 0.8;
-    vec3 specular = vec3(1.0) * specAmount;
+    vec3 specular = u_lightColor * specAmount;
 
-    vec3 diffuse = vec3(1.0, 1.0, 0.9) * vec3(baseColor) * nDotL * 0.7;
+    vec3 diffuse = u_lightColor * vec3(baseColor) * nDotL * 0.7;
     vec3 ambient = vec3(baseColor) * 0.2;
 
     vec3 finalColor = vec3(baseColor);
@@ -87,6 +88,7 @@ void main() {
             finalColor = diffuse + ambient;
         }
     }
+
 
     // Spotlight calculation
     if (u_spotLightOn) {
@@ -139,6 +141,7 @@ let u_lightPos;
 let g_lightPos=[0, 1, 1];
 let u_cameraPos;
 let u_lightOn;
+let u_lightColor;
 let g_autoMove = true;
 
 let u_spotLightPos;
@@ -196,6 +199,12 @@ function connectVariableToGLSL() {
     u_lightOn = gl.getUniformLocation(gl.program, 'u_lightOn');
     if (!u_lightOn) {
         console.log('Failed to get the storage location of u_lightOn');
+        return;
+    }
+
+    u_lightColor = gl.getUniformLocation(gl.program, 'u_lightColor');
+    if (!u_lightColor) {
+        console.log('Failed to get the storage location of u_lightColor');
         return;
     }
 
@@ -442,6 +451,7 @@ function getRandomPosition() {
 
 let g_normalOn = false;
 let g_lightOn = true;
+let g_lightColor = [1, 1, 1];
 
 
 
@@ -456,6 +466,17 @@ let g_renderPsyduck = false;
 
 
 function addActionsforHTMLUI(){
+
+    document.getElementById('lightColor').addEventListener('input', function(event) {
+        const color = event.target.value;
+        const red = parseInt(color.substring(1, 3), 16) / 255;
+        const green = parseInt(color.substring(3, 5), 16) / 255;
+        const blue = parseInt(color.substring(5, 7), 16) / 255;
+        g_lightColor = [red, green, blue];
+
+        gl.uniform3f(u_lightColor, g_lightColor[0], g_lightColor[1], g_lightColor[2]);
+        renderAllShapes();
+    });
 
 
 
@@ -1107,6 +1128,7 @@ function drawTestCube() {
     gl.uniform3f(u_cameraPos, g_eye[0], g_eye[1], g_eye[2]);
 
     gl.uniform1i(u_lightOn, g_lightOn);
+    gl.uniform3f(u_lightColor, g_lightColor[0], g_lightColor[1], g_lightColor[2]);
     // Draw the light
     var light = new Cube();
     light.color = [2, 2, 0, 1];
