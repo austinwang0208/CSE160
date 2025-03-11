@@ -52,6 +52,9 @@
     <div id="controls">
         <button id="toggleShadows">Toggle Shadows</button>
         <button id="switchCamera">Switch Camera</button>
+        <button id="toggleHemisphere">Toggle Hemisphere Light</button>
+        <button id="toggleSpot">Toggle Spot Light</button>
+        <button id="toggleDirectional">Toggle Directional Light</button>
     </div>
     <script type="importmap">
         {
@@ -426,44 +429,7 @@ objLoader.load('cow.obj', (root) => {
 
         }
 
-        // Load custom 3D model (OBJ file)
-        // const objLoader = new OBJLoader();
-        // objLoader.load(
-        //     'https://threejs.org/examples/models/obj/tree.obj',
-        //     (object) => {
-        //         object.traverse((child) => {
-        //             if (child.isMesh) {
-        //                 child.material = new THREE.MeshStandardMaterial({ 
-        //                     color: 0x8B4513,
-        //                     roughness: 0.8,
-        //                     metalness: 0.2
-        //                 });
-        //                 child.castShadow = true;
-        //                 child.receiveShadow = true;
-        //             }
-        //         });
-        //         object.scale.set(0.5, 0.5, 0.5);
-        //         object.position.set(-8, 0, -8);
-        //         scene.add(object);
-        //     },
-        //     (xhr) => {
-        //         console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-        //     },
-        //     (error) => {
-        //         console.error('An error happened', error);
-        //         // Fallback if model can't be loaded
-        //         const fallbackGeometry = new THREE.ConeGeometry(1, 3, 16);
-        //         const fallbackMaterial = new THREE.MeshStandardMaterial({ color: 0x228B22 });
-        //         const fallbackTree = new THREE.Mesh(fallbackGeometry, fallbackMaterial);
-        //         fallbackTree.position.set(-8, 1.5, -8);
-        //         fallbackTree.castShadow = true;
-        //         fallbackTree.receiveShadow = true;
-        //         scene.add(fallbackTree);
-        //     }
-        // );
 
-        // Create three different light sources
-        // 1. Directional Light (simulates sun)
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         directionalLight.position.set(5, 10, 7);
         directionalLight.castShadow = true;
@@ -477,43 +443,36 @@ objLoader.load('cow.obj', (root) => {
         directionalLight.shadow.camera.bottom = -20;
         scene.add(directionalLight);
 
-        // Helper to visualize directional light
         const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 1);
         // scene.add(directionalLightHelper);
 
-        // 2. Ambient Light (general illumination)
         const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
-        scene.add(ambientLight);
+        // scene.add(ambientLight);
 
-        // 3. Point Light (like a lamp)
-        const pointLight = new THREE.PointLight(0xff9000, 1, 20);
+        const pointLight = new THREE.PointLight(0x4080ff, 1, 20);
         pointLight.position.set(0, 5, 0);
         pointLight.castShadow = true;
-        scene.add(pointLight);
+        // scene.add(pointLight);
 
-        // Helper to visualize point light
         const pointLightHelper = new THREE.PointLightHelper(pointLight, 0.5);
         // scene.add(pointLightHelper);
 
-        // 4. Spot Light
-        const spotLight = new THREE.SpotLight(0x0000ff, 1);
-        spotLight.position.set(-5, 10, 5);
-        spotLight.angle = Math.PI / 6;
+        const spotLight = new THREE.SpotLight(0x4080ff, 10);
+        spotLight.position.set(0, 20, 10);
+        spotLight.angle = Math.PI / 9;
         spotLight.penumbra = 0.1;
-        spotLight.decay = 2;
-        spotLight.distance = 50;
+        spotLight.decay = 0;
+        spotLight.distance = 100;
         spotLight.castShadow = true;
+        spotLight.target.position.set(0, 3, 20);
         scene.add(spotLight);
 
-        // Helper to visualize spot light
         const spotLightHelper = new THREE.SpotLightHelper(spotLight);
-        // scene.add(spotLightHelper);
+        scene.add(spotLightHelper);
 
-        // 5. Hemisphere Light
         const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 0.5);
         scene.add(hemisphereLight);
 
-        // Create a skybox
         const skyboxLoader = new THREE.CubeTextureLoader();
         const skyboxTexture = skyboxLoader.load([
             'px.jpg',
@@ -695,39 +654,28 @@ objLoader.load('cow.obj', (root) => {
             pointLightHelper.update();
             spotLightHelper.update();
             
-            // // Render to texture for mirror effect
-            // const mirrorWorldPosition = new THREE.Vector3();
-            // mirror.getWorldPosition(mirrorWorldPosition);
-            
-            // const normalMatrix = new THREE.Matrix4();
-            // normalMatrix.extractRotation(mirror.matrixWorld);
-            // const normal = new THREE.Vector3(0, 0, 1);
-            // normal.applyMatrix4(normalMatrix);
-            
-            // const view = new THREE.Vector3();
-            // view.subVectors(mirrorWorldPosition, activeCamera.position).normalize();
-            
-            // const mirrorCamPos = new THREE.Vector3();
-            // mirrorCamPos.copy(view).multiplyScalar(-10).add(mirrorWorldPosition);
-            
-            // mirrorCamera.position.copy(mirrorCamPos);
-            // mirrorCamera.up.set(0, 1, 0);
-            // mirrorCamera.lookAt(mirrorWorldPosition.x, mirrorWorldPosition.y, mirrorWorldPosition.z);
-            
-            // // Temporarily hide the mirror
-            // mirror.visible = false;
-            
-            // // Render the scene from mirror camera perspective
-            // renderer.setRenderTarget(renderTarget);
-            // renderer.render(scene, mirrorCamera);
-            
-            // // Show the mirror again
-            // mirror.visible = true;
             
             // Render the main scene
             renderer.setRenderTarget(null);
             renderer.render(scene, activeCamera);
         }
+
+                // Toggle Hemisphere Light
+                document.getElementById('toggleHemisphere').addEventListener('click', function() {
+            hemisphereLight.visible = !hemisphereLight.visible;
+        });
+
+        // Toggle Spot Light
+        document.getElementById('toggleSpot').addEventListener('click', function() {
+            spotLight.visible = !spotLight.visible;
+            spotLightHelper.visible = !spotLightHelper.visible;
+        });
+
+        // Toggle Directional Light
+        document.getElementById('toggleDirectional').addEventListener('click', function() {
+            directionalLight.visible = !directionalLight.visible;
+            directionalLightHelper.visible = !directionalLightHelper.visible;
+        });
 
         // Start animation
         animate();
